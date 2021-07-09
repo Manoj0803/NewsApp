@@ -1,14 +1,14 @@
 package com.androiddevs.mvvmnewsapp.ui.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,7 +20,7 @@ import com.androiddevs.mvvmnewsapp.repository.NewsRepository
 import com.androiddevs.mvvmnewsapp.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.androiddevs.mvvmnewsapp.util.Resource
 import com.androiddevs.mvvmnewsapp.viewmodel.NewsViewModel
-import com.androiddevs.mvvmnewsapp.viewmodel.NewsViewModelFactory
+import com.androiddevs.mvvmnewsapp.viewmodel.BreakingNewsViewModelFactory
 
 class BreakingNewsFragment : Fragment() {
 
@@ -28,7 +28,7 @@ class BreakingNewsFragment : Fragment() {
     private lateinit var newsAdapter: NewsAdapter
     private val TAG = "breakingNewsFragment"
 
-    private lateinit var newsViewModel: NewsViewModel
+    lateinit var viewModel: NewsViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +42,20 @@ class BreakingNewsFragment : Fragment() {
             container,
             false
         )
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val newsRepository = NewsRepository(ArticleDatabase.getDatabase(requireContext()))
+        val factory = activity?.let {
+            BreakingNewsViewModelFactory(
+                it.application,
+                newsRepository
+            )
+        }
+        viewModel = ViewModelProvider(this,factory!!).get(NewsViewModel::class.java)
 
         setUpRecyclerView()
 
@@ -54,11 +68,6 @@ class BreakingNewsFragment : Fragment() {
                 bundle
             )
         }
-
-        val newsRepository = NewsRepository(ArticleDatabase.getDatabase(this.context!!))
-        val viewModel : NewsViewModel by activityViewModels{ NewsViewModelFactory(newsRepository) }
-
-        newsViewModel = viewModel
 
         viewModel.breakingNews.observe(viewLifecycleOwner, { response ->
             when(response){
@@ -82,14 +91,12 @@ class BreakingNewsFragment : Fragment() {
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let{ message ->
-                        Log.e(TAG , "An error occured: $message")
+//                        Log.e(TAG , "An error Occured : $message")
+                        Toast.makeText(activity,"An error occured ${message}",Toast.LENGTH_LONG).show()
                     }
                 }
             }
         })
-
-
-        return binding.root
     }
 
     private fun hideProgressBar() {
@@ -107,7 +114,7 @@ class BreakingNewsFragment : Fragment() {
     var isLastPage = false
     var isScrolling = false
 
-    val scrollListener = object : RecyclerView.OnScrollListener() {
+    private val scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL){
@@ -131,12 +138,13 @@ class BreakingNewsFragment : Fragment() {
             val shouldPaginate = isNotLoadingAndNotLastPage and isAtLastItem and
                     isNotAtBeginning and isTotalMoreThanVisible
 
-            if(shouldPaginate == true){
-                newsViewModel.getBreakingNews("in")
+            if(shouldPaginate){
+                viewModel.getBreakingNews("in")
                 isScrolling = false
             }
         }
     }
+
 
 
     private fun setUpRecyclerView() {

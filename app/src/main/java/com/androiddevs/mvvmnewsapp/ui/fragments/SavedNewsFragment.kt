@@ -1,12 +1,13 @@
 package com.androiddevs.mvvmnewsapp.ui.fragments
 
+import android.app.Application
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,12 +15,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.androiddevs.mvvmnewsapp.R
 import com.androiddevs.mvvmnewsapp.adapters.NewsAdapter
 import com.androiddevs.mvvmnewsapp.databinding.FragmentSavedNewsBinding
+import com.androiddevs.mvvmnewsapp.db.ArticleDatabase
+import com.androiddevs.mvvmnewsapp.repository.NewsRepository
 import com.androiddevs.mvvmnewsapp.viewmodel.NewsViewModel
+import com.androiddevs.mvvmnewsapp.viewmodel.BreakingNewsViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 
 class SavedNewsFragment : Fragment() {
 
-    private val viewModel : NewsViewModel by activityViewModels()
+    private lateinit var viewModel : NewsViewModel
     private lateinit var binding : FragmentSavedNewsBinding
     private lateinit var newsAdapter : NewsAdapter
 
@@ -35,8 +39,18 @@ class SavedNewsFragment : Fragment() {
             container,
             false
         )
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         setUpRecyclerView()
+
+        val newsRepository = NewsRepository(ArticleDatabase.getDatabase(requireContext()))
+        val factory = BreakingNewsViewModelFactory(Application(),newsRepository)
+        viewModel = ViewModelProvider(requireActivity(),factory).get(NewsViewModel::class.java)
+
 
         newsAdapter.setOnItemClickListener {
             val bundle = Bundle().apply{
@@ -66,7 +80,7 @@ class SavedNewsFragment : Fragment() {
 
                 viewModel.deleteArticle(article)
 
-                Snackbar.make(view!!,"Article Deleted.",Snackbar.LENGTH_LONG).apply {
+                Snackbar.make(view,"Article Deleted.",Snackbar.LENGTH_LONG).apply {
                     setAction("Undo") {
                         viewModel.saveArticle(article)
                     }
@@ -81,7 +95,6 @@ class SavedNewsFragment : Fragment() {
             newsAdapter.differ.submitList(articles)
         })
 
-        return binding.root
     }
 
     private fun setUpRecyclerView() {
