@@ -117,8 +117,6 @@ class SearchNewsFragment : Fragment() {
                     hideProgressBar()
                     response.data?.let{ newsResponse ->
 
-//                        Log.i("SearchNews","Size - ${newsResponse.totalResults}")
-
                         newsAdapter.differ.submitList(newsResponse.articles)
                         val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
                         isLastPage = viewModel.searchNewsPage == totalPages
@@ -199,20 +197,4 @@ class SearchNewsFragment : Fragment() {
             }
         }
     }
-
-//    override fun onItemClicked(item: News) {
-//        val duration = Toast.LENGTH_SHORT
-//        val toast = Toast.makeText(applicationContext,item.title,duration)
-//        toast.show()
-//
-////        String url = ¨https://paul.kinlan.me/¨;
-////        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-//
-//        val builder = CustomTabsIntent.Builder()
-//        val customTabsIntent = builder.build()
-//        customTabsIntent.launchUrl(this, Uri.parse(item.url))
-////        CustomTabsIntent customTabsIntent = builder.build();
-////        customTabsIntent.launchUrl(this, Uri.parse(url));
-//    }
-
 }

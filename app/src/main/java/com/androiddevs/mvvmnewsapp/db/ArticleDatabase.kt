@@ -3,9 +3,10 @@ package com.androiddevs.mvvmnewsapp.db
 import android.content.Context
 import androidx.room.*
 import com.androiddevs.mvvmnewsapp.models.Article
+import com.androiddevs.mvvmnewsapp.models.Country
 
 @Database(
-    entities = [Article::class] ,
+    entities = [Article::class,Country::class] ,
     version = 1,
     exportSchema = false
 )

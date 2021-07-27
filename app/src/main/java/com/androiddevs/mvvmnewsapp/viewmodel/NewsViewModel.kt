@@ -6,10 +6,10 @@ import android.net.ConnectivityManager
 import android.net.ConnectivityManager.*
 import android.net.NetworkCapabilities.*
 import android.os.Build
-import android.util.Log
 import androidx.lifecycle.*
 import com.androiddevs.mvvmnewsapp.NewsApplication
 import com.androiddevs.mvvmnewsapp.models.Article
+import com.androiddevs.mvvmnewsapp.models.Country
 import com.androiddevs.mvvmnewsapp.models.NewsResponse
 import com.androiddevs.mvvmnewsapp.repository.NewsRepository
 import com.androiddevs.mvvmnewsapp.util.Resource
@@ -18,7 +18,6 @@ import retrofit2.Response
 import java.io.IOException
 
 enum class ApiStatus { LOADING, ERROR, DONE }
-
 
 class NewsViewModel(
     application: Application,
@@ -32,13 +31,16 @@ class NewsViewModel(
     private var breakingNewsResponse : NewsResponse? = null
 
     private val _status = MutableLiveData<ApiStatus>()
-    val status : LiveData<ApiStatus>
-        get() = _status
 
-
+    val countries = arrayOf("China","India","USA")
+    val countriesId = arrayOf("cn","in","us")
 
     init {
-        getBreakingNews("in")
+        viewModelScope.launch {
+            repository.saveCountry(Country(0,"USA","us"))
+            breakingNewsPage=1
+            getBreakingNews(repository.getCountry())
+        }
     }
 
     private suspend fun safeBreakingNewsCall(countryCode: String){
@@ -75,11 +77,10 @@ class NewsViewModel(
         if(response.isSuccessful){
             response.body()?.let { resultResponse ->
                 breakingNewsPage++
-                if(breakingNewsResponse==null){
+                if(breakingNewsPage==2){
                     breakingNewsResponse=resultResponse
                 }
                 else {
-//                    val oldArticles = breakingNewsResponse!!.articles
                     val newArticles = resultResponse.articles
                     (breakingNewsResponse!!.articles).addAll(newArticles)
                 }
@@ -126,5 +127,11 @@ class NewsViewModel(
             }
         }
         return false
+    }
+
+    fun saveCountry(country: Country) {
+        viewModelScope.launch {
+            repository.saveCountry(country)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.androiddevs.mvvmnewsapp.ui.fragments
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.*
 import android.widget.AbsListView
@@ -14,6 +15,7 @@ import com.androiddevs.mvvmnewsapp.R
 import com.androiddevs.mvvmnewsapp.adapters.NewsAdapter
 import com.androiddevs.mvvmnewsapp.databinding.FragmentBreakingNewsBinding
 import com.androiddevs.mvvmnewsapp.db.ArticleDatabase
+import com.androiddevs.mvvmnewsapp.models.Country
 import com.androiddevs.mvvmnewsapp.repository.NewsRepository
 import com.androiddevs.mvvmnewsapp.util.Constants.Companion.QUERY_PAGE_SIZE
 import com.androiddevs.mvvmnewsapp.util.Resource
@@ -51,10 +53,25 @@ class BreakingNewsFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         if(item.itemId==R.id.location_menu){
-
+            showCountryOptions()
         }
-
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showCountryOptions() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Countries")
+            .setItems(viewModel.countries){_,i->
+
+                viewModel.saveCountry(Country(0,
+                    viewModel.countries[i],
+                    viewModel.countriesId[i]
+                ))
+                viewModel.breakingNewsPage=1
+                viewModel.getBreakingNews(viewModel.countriesId[i])
+            }
+            .create()
+            .show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -68,7 +85,6 @@ class BreakingNewsFragment : Fragment() {
             )
         }
         viewModel = ViewModelProvider(this,factory!!).get(NewsViewModel::class.java)
-
         setUpRecyclerView()
 
         newsAdapter.setOnItemClickListener {
@@ -103,7 +119,6 @@ class BreakingNewsFragment : Fragment() {
                 is Resource.Error -> {
                     hideProgressBar()
                     response.message?.let{ message ->
-//                        Log.e(TAG , "An error Occured : $message")
                         Toast.makeText(activity,"An error occured ${message}",Toast.LENGTH_LONG).show()
                     }
                 }
