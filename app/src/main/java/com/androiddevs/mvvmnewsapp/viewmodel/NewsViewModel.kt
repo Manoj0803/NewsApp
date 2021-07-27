@@ -35,6 +35,8 @@ class NewsViewModel(
     val status : LiveData<ApiStatus>
         get() = _status
 
+
+
     init {
         getBreakingNews("in")
     }

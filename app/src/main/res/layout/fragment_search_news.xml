@@ -7,12 +7,18 @@
     >
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp"
+        android:paddingTop="2dp">
 
         <EditText
             android:id="@+id/etSearch"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="@android:color/transparent"
             android:hint="@string/search"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"

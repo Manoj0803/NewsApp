@@ -9,7 +9,7 @@
     <fragment
         android:id="@+id/articleFragment"
         android:name="com.androiddevs.mvvmnewsapp.ui.fragments.ArticleFragment"
-        android:label="ArticleFragment"
+        android:label="News"
         tools:layout="@layout/fragment_article"
         >
         <argument
@@ -19,7 +19,7 @@
     <fragment
         android:id="@+id/breakingNewsFragment"
         android:name="com.androiddevs.mvvmnewsapp.ui.fragments.BreakingNewsFragment"
-        android:label="BreakingNewsFragment"
+        android:label="Breaking News"
         tools:layout="@layout/fragment_breaking_news"
         >
         <action
@@ -33,7 +33,7 @@
     <fragment
         android:id="@+id/searchNewsFragment"
         android:name="com.androiddevs.mvvmnewsapp.ui.fragments.SearchNewsFragment"
-        android:label="SearchNewsFragment"
+        android:label="Search News"
         tools:layout="@layout/fragment_search_news"
         >
 
@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/savedNewsFragment"
         android:name="com.androiddevs.mvvmnewsapp.ui.fragments.SavedNewsFragment"
-        android:label="SavedNewsFragment"
+        android:label="Saved News"
         tools:layout="@layout/fragment_saved_news"
         >
         <action
