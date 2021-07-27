@@ -1,11 +1,9 @@
 package com.androiddevs.mvvmnewsapp.ui.fragments
 
-import android.app.Application
+import android.app.AlertDialog
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
@@ -49,7 +47,29 @@ class SearchNewsFragment : Fragment() {
             container,
             false
         )
+
+        setHasOptionsMenu(true)
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.category_menu,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId==R.id.category_menu){
+            searchByCategory()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun searchByCategory() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("Categories")
+            .setItems(viewModel.searchCategories) { _, i ->
+                viewModel.searchNewsByCategory(viewModel.searchCategories[i])
+                viewModel.previousQuery = viewModel.searchCategories[i]
+            }.create().show()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -78,10 +98,10 @@ class SearchNewsFragment : Fragment() {
             job = MainScope().launch {
                 delay(SEARCH_NEWS_TIME_DELAY)
                 editable?.let{
-                    if(editable.toString().isNotEmpty() and (viewModel.preQuery != editable.toString())){
+                    if(editable.toString().isNotEmpty() and (viewModel.previousQuery != editable.toString())){
                         Log.i("SearchNewsFragment","EditText")
                         viewModel.searchNews(editable.toString())
-                        viewModel.preQuery = editable.toString()
+                        viewModel.previousQuery = editable.toString()
                     }
                 }
             }
@@ -97,7 +117,7 @@ class SearchNewsFragment : Fragment() {
                     hideProgressBar()
                     response.data?.let{ newsResponse ->
 
-                        Log.i("SearchNews","Size - ${newsResponse.totalResults}")
+//                        Log.i("SearchNews","Size - ${newsResponse.totalResults}")
 
                         newsAdapter.differ.submitList(newsResponse.articles)
                         val totalPages = newsResponse.totalResults / Constants.QUERY_PAGE_SIZE + 2
@@ -116,7 +136,6 @@ class SearchNewsFragment : Fragment() {
                 }
             }
         })
-
     }
 
     private fun hideProgressBar() {
@@ -128,7 +147,6 @@ class SearchNewsFragment : Fragment() {
         binding.paginationProgressBar.visibility = View.VISIBLE
         isLoading = true
     }
-
 
     var isLoading = false
     var isLastPage = false
@@ -159,12 +177,16 @@ class SearchNewsFragment : Fragment() {
                     isNotAtBeginning and isTotalMoreThanVisible
 
             if(shouldPaginate){
-                viewModel.searchNews(binding.etSearch.text.toString())
+                if(binding.etSearch.text.isEmpty()){
+                    viewModel.searchNewsByCategory(viewModel.previousQuery!!)
+                }
+                else {
+                    viewModel.searchNews(binding.etSearch.text.toString())
+                }
                 isScrolling = false
             }
         }
     }
-
 
     private fun setUpRecyclerView() {
         newsAdapter = NewsAdapter()

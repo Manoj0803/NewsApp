@@ -26,17 +26,27 @@ class SearchNewsViewModel(
     var searchNewsPage = 1
     private var searchNewsResponse : NewsResponse? = null
 
-    var preQuery : String? = null
+    var previousQuery : String? = null
+
+    val searchCategories = arrayOf(
+        "business",
+        "entertainment",
+        "general",
+        "health",
+        "science",
+        "sports",
+        "technology"
+    )
 
     private suspend fun safeSearchNewsCall(searchQuery: String){
         _searchNews.postValue(Resource.Loading())
         try{
             if(hasInternetConnection()){
 
-                if(preQuery != searchQuery)
+                if(previousQuery != searchQuery)
                     searchNewsPage=1
 
-                Log.i("SearchNewsViewModel","pageSize - $searchNewsPage")
+//                Log.i("SearchNewsViewModel","pageSize - $searchNewsPage")
 
                 val response = repository.searchNews(searchQuery   ,searchNewsPage)
                 _searchNews.postValue(handleSearchNewsResponse(response))
@@ -52,6 +62,38 @@ class SearchNewsViewModel(
             }
         }
     }
+
+//    Search By Category..
+
+    fun searchNewsByCategory(searchCategory: String){
+        viewModelScope.launch {
+            safeSearchNewsByCategory(searchCategory)
+        }
+    }
+
+    private suspend fun safeSearchNewsByCategory(searchCategory: String){
+        _searchNews.postValue(Resource.Loading())
+        try{
+            if(hasInternetConnection()){
+
+                if(previousQuery != searchCategory)
+                    searchNewsPage=1
+
+                val response = repository.searchByCategory(searchCategory   ,searchNewsPage)
+                _searchNews.postValue(handleSearchNewsResponse(response))
+            }
+            else{
+                _searchNews.postValue(Resource.Error("No Internet Connection"))
+            }
+        }
+        catch (t : Throwable){
+            when(t){
+                is IOException -> _searchNews.postValue(Resource.Error("Network Failure."))
+                else -> _searchNews.postValue(Resource.Error("Conversion Error."))
+            }
+        }
+    }
+
 
     fun searchNews(searchQuery : String){
         viewModelScope.launch {

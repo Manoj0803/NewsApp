@@ -1,9 +1,7 @@
 package com.androiddevs.mvvmnewsapp.ui.fragments
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AbsListView
 import android.widget.Toast
 import androidx.databinding.DataBindingUtil
@@ -42,7 +40,21 @@ class BreakingNewsFragment : Fragment() {
             container,
             false
         )
+        setHasOptionsMenu(true)
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.location_menu,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if(item.itemId==R.id.location_menu){
+
+        }
+
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -98,6 +110,8 @@ class BreakingNewsFragment : Fragment() {
             }
         })
     }
+
+
 
     private fun hideProgressBar() {
         binding.paginationProgressBar.visibility = View.INVISIBLE
